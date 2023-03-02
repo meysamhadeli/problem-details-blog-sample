@@ -4,9 +4,9 @@ using WebApp;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class Values2Controller : ControllerBase
+public class ValuesController : ControllerBase
 {
-    // api/values2/SimpleTest/0
+    // api/values/SimpleTest/0
     [HttpGet("{number}")]
     public IActionResult SimpleTest(int number)
     {
@@ -18,7 +18,7 @@ public class Values2Controller : ControllerBase
         return Ok(number);
     }
     
-    // api/values2/CustomErrorTest/0
+    // api/values/CustomErrorTest/0
     [HttpGet("{number}")]
     public IActionResult CustomErrorTest(int number)
     {
@@ -35,7 +35,7 @@ public class Values2Controller : ControllerBase
         return Ok(number);
     }
     
-    // api/values2/CustomExceptionTest/0
+    // api/values/CustomExceptionTest/0
     [HttpGet("{number}")]
     public IActionResult CustomExceptionTest(int number)
     {

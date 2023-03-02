@@ -2,5 +2,6 @@
 
 public enum ErrorType
 {
-    ArgumentException
+    ArgumentException,
+    NullReferenceException
 }
