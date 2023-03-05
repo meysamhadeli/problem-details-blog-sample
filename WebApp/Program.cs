@@ -13,12 +13,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(async context =>
     {
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = "application/problem+json";
-
-        var title = "Bad Input";
-        var detail = "Invalid input";
-        var type = "https://errors.example.com/badInput";
 
         if (context.RequestServices.GetService<IProblemDetailsService>() is { } problemDetailsService)
         {
@@ -27,27 +22,36 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
             if (exceptionType is not null)
             {
-                switch (exceptionType)
+                (string Detail, string Type, string Title, int StatusCode) details = exceptionType switch
                 {
-                    case CustomException customException:
-                        title = customException.GetType().Name;
-                        detail = customException.Message;
-                        type = customException.GetType().ToString();
-                        context.Response.StatusCode = (int)customException.StatusCode;
-                        break;
-                }   
-            }
+                    CustomException customException =>
+                    (
+                        exceptionType.Message,
+                        exceptionType.GetType().ToString(),
+                        exceptionType.GetType().Name,
+                        context.Response.StatusCode = (int)customException.StatusCode
+                    ),
+                    _ =>
+                    (
+                        exceptionType.Message,
+                        exceptionType.GetType().ToString(),
+                        exceptionType.GetType().Name,
+                        context.Response.StatusCode = StatusCodes.Status500InternalServerError
+                    )
+                };
 
-            await problemDetailsService.WriteAsync(new ProblemDetailsContext
-            {
-                HttpContext = context,
-                ProblemDetails =
+                await problemDetailsService.WriteAsync(new ProblemDetailsContext
                 {
-                    Title = title,
-                    Detail = detail,
-                    Type = type
-                }
-            });
+                    HttpContext = context,
+                    ProblemDetails =
+                    {
+                        Title = details.Title,
+                        Detail = details.Detail,
+                        Type = details.Type,
+                        Status = details.StatusCode
+                    }
+                });
+            }
         }
     });
 });
